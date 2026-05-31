@@ -1,0 +1,41 @@
+name: MRE
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  verify:
+    name: ${{ matrix.scenario }} · ${{ matrix.os }} · node-${{ matrix.node }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+        node: [22, 24, 26]
+        scenario: [wedge, control, tinyexec]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: ${{ matrix.node }}
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+      - name: Configure git identity for hook-driven commits
+        run: |
+          git config --global user.email mre@example.com
+          git config --global user.name MRE
+      - name: Install
+        run: pnpm install --no-frozen-lockfile
+      - name: Resolved versions
+        run: |
+          node -p "'lint-staged ' + require('./node_modules/lint-staged/package.json').version"
+          node -p "'tinyexec ' + require('./node_modules/tinyexec/package.json').version"
+          node -p "'eslint ' + require('./node_modules/eslint/package.json').version"
+          node -p "'husky ' + require('./node_modules/husky/package.json').version"
+      - name: Run verify:${{ matrix.scenario }}
+        run: pnpm verify:${{ matrix.scenario }}

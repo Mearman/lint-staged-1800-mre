@@ -23,6 +23,13 @@ stdio-inheriting subprocess.
 
 ```sh
 pnpm install
+pnpm verify        # runs verify:wedge, verify:control, verify:tinyexec back-to-back
+```
+
+`pnpm verify:wedge` is the headline scenario. The bare-hands form:
+
+```sh
+pnpm install
 echo "// trigger" >> src/hello.ts
 git add src/hello.ts
 timeout 25 git commit -m wedge
@@ -56,6 +63,29 @@ timeout 25 git commit -m control
 
 Same lint-staged, same tinyexec, same eslint, same projectService config;
 only the rule that spawns the stdio-inheriting grandchild differs.
+
+## What doesn't help
+
+Common deflections, none of which break the wedge:
+
+- **`--no-stash`**: lint-staged still spawns the eslint task through
+  tinyexec and still consumes via the iterator. The hang is in the
+  iterator, not in the stash mechanism. `--no-stash` was tried in the
+  original report and didn't help.
+- **`pnpm exec lint-staged` vs `node node_modules/.bin/lint-staged`**:
+  the pnpm exec chain is irrelevant. Bypassing it with a direct node
+  invocation in the husky hook leaves the wedge intact. Same for
+  switching `lint-staged.config.ts` between `"eslint --cache --fix"`
+  and `"node node_modules/.bin/eslint --cache --fix"`.
+- **Pinning newer tinyexec**: 1.2.3 added a destroy-on-exit fix that
+  introduced a buffer-drain race on Linux (tinylibs/tinyexec#139);
+  1.2.4 reverted the fix. The wedge applies to every version. The
+  `exitDrainTimeout` branch at
+  `github.com/Mearman/tinyexec/tree/fix/buffer-drain-race` resolves
+  both, but hasn't been picked up upstream.
+- **`--no-verify`** "fixes" the hang only because it skips the hook
+  entirely — no lint-staged runs, no tinyexec call, no iterator. Not a
+  fix; just an escape hatch.
 
 ## Versions pinned by `package.json`
 
@@ -145,7 +175,25 @@ deadlock for any grandchild shape.
 
 The MRE uses a synthetic plugin because that's the cleanest way to force
 the grandchild; we have not pinned down which real-world plugin or
-parser was the production trigger. But anything that does
-`child_process.spawn(..., {stdio: 'inherit'})` inside an eslint
-rule/parser/formatter has the same effect — and the production stack
-clearly contained one.
+parser was the production trigger. But anything inside an ESLint
+rule, parser, formatter, or transitively-loaded helper that produces a
+stdio-inheriting child outlives the parent has the same effect.
+Plausible shapes that wouldn't surprise me:
+
+- `child_process.exec(cmd, callback)` — the callback form, with no
+  `.unref()`, when the caller doesn't care about waiting on the result.
+- `child_process.spawn(cmd, args)` with defaults, where the spawner
+  assumes "when I exit, the OS will reap it" — which it doesn't, if
+  the child is sleeping on a syscall.
+- A worker thread with `stdio: 'pipe'` (Node 22+) or a hand-rolled
+  worker that doesn't override `process.stdout._writev` the way synckit
+  does.
+- An LSP probe — a plugin that talks to a language server it spawned
+  itself, doesn't kill it on rule completion because the server is
+  reusable across files.
+- A subprocess attached to a tool like `tsc --watch`, `node --inspect`,
+  or a custom transpiler that backgrounds itself.
+
+None of these are confirmed as the production trigger; they're the
+patterns I can think of that exist in real ESLint extensions. The
+synthetic plugin in this MRE is the smallest stand-in for the class.

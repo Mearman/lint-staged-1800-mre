@@ -6,7 +6,11 @@
   "packageManager": "pnpm@10.33.1",
   "scripts": {
     "prepare": "husky",
-    "probe:tinyexec": "node probes/tinyexec-direct.mjs"
+    "probe:tinyexec": "node probes/tinyexec-direct.mjs",
+    "verify:wedge": "scripts/verify-wedge.sh",
+    "verify:control": "scripts/verify-control.sh",
+    "verify:tinyexec": "scripts/verify-tinyexec.sh",
+    "verify": "scripts/verify-wedge.sh && scripts/verify-control.sh && scripts/verify-tinyexec.sh"
   },
   "devDependencies": {
     "@eslint/js": "10.0.1",
