@@ -32,7 +32,8 @@ OUT=$(mktemp)
 ( node scripts/timeout.mjs 25 git commit -m "verify-wedge" ) >"$OUT" 2>&1
 EC=$?
 
-LAST=$(tail -1 "$OUT")
+# Strip ANSI colour escapes that CI runners (FORCE_COLOR) inject.
+LAST=$(tail -1 "$OUT" | sed $'s/\033\\[[0-9;]*[a-zA-Z]//g')
 
 echo "exit_code=$EC"
 echo "last_output_line=$LAST"

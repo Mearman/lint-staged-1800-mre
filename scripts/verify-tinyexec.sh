@@ -15,7 +15,7 @@ OUT=$(mktemp)
 ( node scripts/timeout.mjs 25 node probes/tinyexec-direct.mjs ) >"$OUT" 2>&1
 EC=$?
 
-LAST=$(tail -1 "$OUT")
+LAST=$(tail -1 "$OUT" | sed $'s/\033\\[[0-9;]*[a-zA-Z]//g')
 
 echo "exit_code=$EC"
 echo "last_output_line=$LAST"
