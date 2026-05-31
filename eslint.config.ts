@@ -15,6 +15,7 @@ export default defineConfig(
       },
     },
     plugins: {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       grandchild: grandchildPlugin,
     },
     rules: {
