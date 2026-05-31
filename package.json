@@ -5,7 +5,8 @@
   "type": "module",
   "packageManager": "pnpm@10.33.1",
   "scripts": {
-    "prepare": "husky"
+    "prepare": "husky",
+    "probe:tinyexec": "node probes/tinyexec-direct.mjs"
   },
   "devDependencies": {
     "@eslint/js": "10.0.1",
@@ -14,6 +15,7 @@
     "husky": "9.1.7",
     "jiti": "2.7.0",
     "lint-staged": "16.4.0",
+    "tinyexec": "1.1.2",
     "typescript": "6.0.3",
     "typescript-eslint": "8.59.1"
   },

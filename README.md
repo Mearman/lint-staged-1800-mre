@@ -103,6 +103,34 @@ in `getSpawnedTask` never returns. lint-staged hangs.
 to bound the wait — it relies solely on stream EOF — so there is no
 timeout and nothing to break the deadlock except an external signal.
 
+## Same wedge without lint-staged
+
+`probes/tinyexec-direct.mjs` calls tinyexec directly against a child
+that spawns one stdio-inheriting node grandchild and then exits — same
+shape as the ESLint plugin in the main reproduction, no lint-staged or
+git involved.
+
+```sh
+timeout 25 pnpm probe:tinyexec ; echo "exit=$?"
+pkill -KILL -f 'setTimeout.*1000.*60.*60'
+```
+
+Expected output:
+
+```
+[parent] spawning child via tinyexec…
+[parent] line: child pid=… grandchild pid=…
+exit=124
+```
+
+The iterator yields the child's one printed line, then never returns
+because the grandchild keeps fds 1 and 2 open. The wedge is therefore a
+property of how tinyexec's async iterator interacts with stdio-inheriting
+grandchildren, not anything specific to lint-staged or ESLint. lint-staged
+is where it becomes user-visible and where a defensive fix has the most
+leverage (it owns the "run this task to completion" semantics), but the
+mechanism sits one layer below it.
+
 ## Why this matters for #1800
 
 The bug is in lint-staged. Same `getSpawnedTask`, same iterator pattern;
