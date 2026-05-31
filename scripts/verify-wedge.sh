@@ -29,7 +29,7 @@ echo "// verify-wedge $(date -u +%s%N)" >> src/hello.ts
 git add src/hello.ts
 
 OUT=$(mktemp)
-( timeout 25 git commit -m "verify-wedge" ) >"$OUT" 2>&1
+( node scripts/timeout.mjs 25 git commit -m "verify-wedge" ) >"$OUT" 2>&1
 EC=$?
 
 LAST=$(tail -1 "$OUT")

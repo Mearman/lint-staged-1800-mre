@@ -12,7 +12,7 @@ cleanup() {
 trap cleanup EXIT
 
 OUT=$(mktemp)
-( timeout 25 node probes/tinyexec-direct.mjs ) >"$OUT" 2>&1
+( node scripts/timeout.mjs 25 node probes/tinyexec-direct.mjs ) >"$OUT" 2>&1
 EC=$?
 
 LAST=$(tail -1 "$OUT")

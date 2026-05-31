@@ -12,14 +12,15 @@ cleanup() {
   pkill -KILL -f 'setTimeout.*1000.*60.*60' 2>/dev/null || true
   rm -f .git/index.lock eslint.config.ts.bak 2>/dev/null || true
   git stash drop --quiet 2>/dev/null || true
-  # If the control commit landed, roll back to the pre-script HEAD
-  # so the script is idempotent.
+  # If the control commit landed, rewind HEAD without touching unrelated
+  # working-tree changes (a previous --hard reset wiped uncommitted edits
+  # to scripts/). --soft preserves index + worktree; we then explicitly
+  # restore only the two files this script touches.
   if [ "$(git rev-parse HEAD 2>/dev/null)" != "$ORIG_HEAD" ]; then
-    git reset --quiet --hard "$ORIG_HEAD" 2>/dev/null || true
-  else
-    git reset --quiet HEAD -- src/hello.ts eslint.config.ts 2>/dev/null || true
-    git checkout HEAD -- src/hello.ts eslint.config.ts 2>/dev/null || true
+    git reset --quiet --soft "$ORIG_HEAD" 2>/dev/null || true
   fi
+  git reset --quiet HEAD -- src/hello.ts eslint.config.ts 2>/dev/null || true
+  git checkout HEAD -- src/hello.ts eslint.config.ts 2>/dev/null || true
 }
 trap cleanup EXIT
 
@@ -36,7 +37,7 @@ echo "// verify-control $(date -u +%s%N)" >> src/hello.ts
 git add src/hello.ts eslint.config.ts
 
 OUT=$(mktemp)
-( timeout 25 git commit -m "verify-control" ) >"$OUT" 2>&1
+( node scripts/timeout.mjs 25 git commit -m "verify-control" ) >"$OUT" 2>&1
 EC=$?
 
 echo "exit_code=$EC"
