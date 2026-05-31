@@ -29,9 +29,11 @@ if [ "$EC" -ne 124 ]; then
   FAIL=1
 fi
 # The iterator should have yielded the child's "child pid=… grandchild pid=…"
-# line and then blocked, so the last printed line is that one.
-if ! printf '%s' "$LAST" | grep -qE '^\[parent\] line: child pid=[0-9]+ grandchild pid=[0-9]+$'; then
-  echo "FAIL: expected last output line to be the child/grandchild pid line"
+# line and then blocked, so the last printed line contains it. Match by
+# substring so ANSI colour from CI runners doesn't break it.
+if ! printf '%s' "$LAST" | grep -qE 'child pid=[0-9]+ grandchild pid=[0-9]+'; then
+  echo "FAIL: expected last output line to contain the child/grandchild pid line"
+  echo "got: $LAST"
   FAIL=1
 fi
 

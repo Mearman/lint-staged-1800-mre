@@ -46,8 +46,9 @@ if [ "$EC" -ne 124 ]; then
   FAIL=1
 fi
 EXPECTED_SUFFIX="[STARTED] node node_modules/eslint/bin/eslint.js --cache --fix"
-if [ "$LAST" != "$EXPECTED_SUFFIX" ]; then
-  echo "FAIL: expected last output line to be:"
+# Substring match so ANSI colour codes injected by CI runners don't break it.
+if ! printf '%s' "$LAST" | grep -qF -- "$EXPECTED_SUFFIX"; then
+  echo "FAIL: expected last output line to contain:"
   echo "  $EXPECTED_SUFFIX"
   echo "got:"
   echo "  $LAST"
