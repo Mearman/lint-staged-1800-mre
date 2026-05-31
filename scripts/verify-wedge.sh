@@ -45,7 +45,7 @@ if [ "$EC" -ne 124 ]; then
   echo "FAIL: expected exit 124 (timeout fired), got $EC"
   FAIL=1
 fi
-EXPECTED_SUFFIX="[STARTED] node node_modules/.bin/eslint --cache --fix"
+EXPECTED_SUFFIX="[STARTED] node node_modules/eslint/bin/eslint.js --cache --fix"
 if [ "$LAST" != "$EXPECTED_SUFFIX" ]; then
   echo "FAIL: expected last output line to be:"
   echo "  $EXPECTED_SUFFIX"

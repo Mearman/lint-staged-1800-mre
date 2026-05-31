@@ -45,7 +45,7 @@ Expected output between the trigger line and the timeout:
 [STARTED] Running tasks for staged files...
 [STARTED] lint-staged.config.ts — 1 file
 [STARTED] *.ts — 1 file
-[STARTED] node node_modules/.bin/eslint --cache --fix
+[STARTED] node node_modules/eslint/bin/eslint.js --cache --fix
 ```
 
 …and then nothing, until `timeout 25` fires.
@@ -76,7 +76,7 @@ Common deflections, none of which break the wedge:
   the pnpm exec chain is irrelevant. Bypassing it with a direct node
   invocation in the husky hook leaves the wedge intact. Same for
   switching `lint-staged.config.ts` between `"eslint --cache --fix"`
-  and `"node node_modules/.bin/eslint --cache --fix"`.
+  and `"node node_modules/eslint/bin/eslint.js --cache --fix"`.
 - **Pinning newer tinyexec**: 1.2.3 added a destroy-on-exit fix that
   introduced a buffer-drain race on Linux (tinylibs/tinyexec#139);
   1.2.4 reverted the fix. The wedge applies to every version. The
