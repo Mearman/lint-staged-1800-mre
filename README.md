@@ -194,7 +194,7 @@ Common deflections, none of which break the wedge:
 | package                 | version |
 | ----------------------- | ------- |
 | lint-staged             | 16.4.0  |
-| tinyexec (pnpm override)| 1.1.2   |
+| tinyexec (pnpm-workspace override)| 1.1.2 |
 | eslint                  | 10.3.0  |
 | typescript-eslint       | 8.59.1  |
 | typescript              | 6.0.3   |
