@@ -7,10 +7,12 @@
   "scripts": {
     "prepare": "husky",
     "probe:tinyexec": "node probes/tinyexec-direct.mjs",
+    "verify:matrix": "scripts/verify-parent-exit-matrix.sh",
+    "verify:tinyexec": "scripts/verify-tinyexec.sh",
     "verify:wedge": "scripts/verify-wedge.sh",
     "verify:control": "scripts/verify-control.sh",
-    "verify:tinyexec": "scripts/verify-tinyexec.sh",
-    "verify": "scripts/verify-wedge.sh && scripts/verify-control.sh && scripts/verify-tinyexec.sh"
+    "verify:fix": "scripts/verify-fix.sh",
+    "verify": "scripts/verify-parent-exit-matrix.sh && scripts/verify-tinyexec.sh && scripts/verify-wedge.sh && scripts/verify-control.sh && scripts/verify-fix.sh"
   },
   "devDependencies": {
     "@eslint/js": "10.0.1",
