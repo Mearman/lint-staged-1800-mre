@@ -1,5 +1,7 @@
 # MRE: lint-staged wedge from grandchild pipe inheritance
 
+[![GitHub](https://img.shields.io/badge/GitHub-181717?logo=github&logoColor=white)](https://github.com/Mearman/lint-staged-1800-mre)
+
 Deterministic reproduction of the wedge in
 [lint-staged/lint-staged#1800](https://github.com/lint-staged/lint-staged/issues/1800):
 
